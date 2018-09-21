@@ -1,6 +1,8 @@
 from scrapy import Spider
 from scrapy.selector import Selector
 
+from stackscraper.items import StackscraperItem
+
 
 class StackoverflowSpider(Spider):
     name = "stackoverflow"
@@ -11,3 +13,11 @@ class StackoverflowSpider(Spider):
 
     def parse(self, response):
         questions = Selector(response).xpath('//div[@class="summary"]/h3')
+
+        for question in questions:
+            item = StackscraperItem()
+            item["title"] = question.xpath(
+                "a[@class='question-hyperlink']/text()").extract()[0]
+            item["url"] = question.xpath(
+                'a[@class="question-hyperlink"]/@href').extract()[0]
+            yield item
